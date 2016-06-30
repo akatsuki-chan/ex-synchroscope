@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ELM CLIENT</title>
+    <style type="text/css"> .aircraft-focus { border: red 1px solid } </style>
+  </head>
+  <body>
+    <h1>title</h1>
+    <input type="text" name="name" id="name" />
+    <div>
+      <input type="checkbox" value="A"/> A<br/>
+      <input type="checkbox" value="B"/> B<br/>
+      <input type="checkbox" value="C"/> C
+    </div>
+    <div>
+      <label><input type="radio" name="number" value="1"/> 1</label><br/>
+      <label><input type="radio" name="number" value="2"/> 2</label><br/>
+      <label><input type="radio" name="number" value="3"/> 3</label>
+    </div>
+    <div>
+      <select>
+        <option></option>
+        <option value="1">1</option>       
+        <option value="2">2</option>       
+        <option value="3">3</option>       
+      </select>
+    </div>
+    <div>
+      <a id="dynamic">add</a>
+      <ul id="links">
+      </ul>
+    </div>
+
+    <script type="text/javascript">
+      document.querySelector("#dynamic").addEventListener("click", function (evt){
+        var li = document.createElement('li');
+        li.innerHTML = "<input type='text' />";
+        document.querySelector("#links").appendChild(li);
+      })
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="../elm.compiled.js"></script>
+    <script type="text/javascript">
+      function selectElementByXPath(expression, parentElement) {
+        var r = []
+        var x = document.evaluate(expression, parentElement || document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
+        for (var i = 0, l = x.snapshotLength; i < l; i++) {
+          r.push(x.snapshotItem(i))
+        }
+        return r
+      }
+
+      var $x = function (path) { return selectElementByXPath(path) }
+      var app = Elm.Aircraft.worker({mode: 0, url: "ws://127.0.0.1:8080/"})
+      el = null
+      app.ports.recvHandler.subscribe(function(json){
+        if (json.event == "position") {
+          console.log(json)
+        } else if (json.event == "code") {
+          el.value += String.fromCharCode(json.code);
+        } else if (json.event == "element") {
+          el = document.getElementById(json.id) 
+        } else if (json.event == "path") {
+          els = selectElementByXPath(json.path)
+          if (els.length == 1){
+            el = els[0]
+            el.click()
+            if (el) {
+              jQuery(".aircraft-focus").removeClass("aircraft-focus")
+              jQuery(el).addClass("aircraft-focus")
+            }
+          }
+        } else if (json.event == "event") {
+          els = $x(json.target)
+          if (els.length == 1) {
+            el = els[0]
+            jQuery(el).val(json.value)
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
+

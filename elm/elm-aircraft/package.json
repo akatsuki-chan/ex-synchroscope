@@ -1,0 +1,21 @@
+{
+  "name": "aircraft",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "build": "elm make src/Main.elm --output elm.compiled.js",
+    "lint": "eslint src/*.js",
+    "watch": "chokidar '**/*.elm' -c 'npm run build' --initial",
+    "server": "elm reactor -a 0.0.0.0"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "elm": "^0.17.0"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^1.2.0",
+    "eslint": "^2.13.1"
+  }
+}
